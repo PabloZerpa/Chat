@@ -27,4 +27,4 @@ export const contador = createCount();
 
 export const ifSelectedChat = writable(null);
 
-export const notification = writable([]);
+// export const notification = writable([]);

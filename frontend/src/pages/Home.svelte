@@ -20,25 +20,22 @@
 
 <div class="h-screen flex flex-col justify-center items-center gap-4 bg-zinc-800 border-2 border-red-500 border-solid">
 
-  {#if loading}
-    <div class="text-center"><Spinner color="blue" size={14} /></div>
-  {:else}
-    <div class="flex gap-4">
-      {#if login}
-        <Button type="button" on:click={() => {login = true}}>Login</Button>
-        <Button type="button" outline on:click={() => {login = false}}>Sign Up</Button>
-      {:else}
-        <Button type="button" outline on:click={() => {login = true}}>Login</Button>
-        <Button type="button" on:click={() => {login = false}}>Sign Up</Button>
-      {/if}
-    </div>
-    
+  <div class="flex gap-4">
     {#if login}
-      <Login bind:loading={loading} />
+      <Button type="button" on:click={() => {login = true}}>Login</Button>
+      <Button type="button" outline on:click={() => {login = false}}>Sign Up</Button>
     {:else}
-      <SignUp />
+      <Button type="button" outline on:click={() => {login = true}}>Login</Button>
+      <Button type="button" on:click={() => {login = false}}>Sign Up</Button>
     {/if}
+  </div>
+  
+  {#if login}
+    <Login />
+  {:else}
+    <SignUp />
   {/if}
+
 
 </div>
 

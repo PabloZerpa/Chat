@@ -4,8 +4,25 @@
   import { Button, Input, Label } from "flowbite-svelte";
   import { navigate } from "svelte-routing";
   import axios from "axios";
+  import { toasts, ToastContainer, FlatToast }  from "svelte-toasts";
 
-  export let loading = false;
+  const showToast = (title, description, type) => {
+    
+    const toast = toasts.add({
+      title: title,
+      description: description,
+      duration: 2000, // 0 or negative to avoid auto-remove
+      type: type,
+      placement: 'top-center',
+      theme: 'dark',
+      showProgress: true,
+      onClick: () => {},
+      onRemove: () => {
+        if(type === 'success')
+          navigate('/chat', { replace: true });
+      },
+    });
+  };
 
   $: email = null;
   $: password = null;
@@ -16,22 +33,22 @@
       try {
         const {data} = await axios.post("http://localhost:5000/api/user/login/", {email,password});
         localStorage.setItem("userInfo", JSON.stringify(data));
-        loading = true;
-        
-        setTimeout(() => {
-          navigate('/chat', { replace: true });
-        }, 2000);
+        showToast('EXITO', 'INICIO DE SESION COMPLETO', 'success');
       } catch (error) {
-        console.log(error.response.data.message);
+        showToast('ERORR', error.response.data.message, 'error');
       }
     }
     else{
-      console.log("CONTRASEÑA MUY CORTA");
+      showToast('ERORR', 'CONTRASEÑA MUY CORTA', 'error');
     }
 
   }
   
 </script>
+
+<ToastContainer placement="top-center" let:data={data}>
+  <FlatToast {data} />
+</ToastContainer>
 
 <form 
   on:submit|preventDefault={sendData} 

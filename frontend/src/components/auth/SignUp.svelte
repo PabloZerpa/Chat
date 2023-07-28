@@ -1,41 +1,60 @@
 <script>
-    import axios from "axios";
-    import { Button, Fileupload, Input, Label } from "flowbite-svelte";
-    import { navigate } from "svelte-routing";
+  // @ts-nocheck
 
-    $: name = null; 
-    $: email = null; 
-    $: password = null; 
-    $: confirmpassword = null; 
-    $: img = null;
-
-    async function sendData(){
-
-      if(password.length > 7){
-        if(password === confirmpassword){
-          await axios.post("http://localhost:5000/api/user/",{name,email,password});
-
-          setTimeout(() => {
-            navigate('/', { replace: true });
-          }, 4000);
-
-          console.log("LOGIN EXITOSO");
-        }
-        else{
-          console.log("CONTRASEÑAS INCORRECTAS");
+  import axios from "axios";
+  import { Button, Fileupload, Input, Label } from "flowbite-svelte";
+  import { navigate } from "svelte-routing";
+  import { toasts, ToastContainer, FlatToast }  from "svelte-toasts";
+  
+  $: name = null; 
+  $: email = null; 
+  $: password = null; 
+  $: confirmpassword = null; 
+  $: img = null;
+  
+  const showToast = (title, description, type) => {
+    const toast = toasts.add({
+      title: title,
+      description: description,
+      duration: 3000, // 0 or negative to avoid auto-remove
+      type: type,
+      placement: 'top-center',
+      theme: 'dark',
+      showProgress: true,
+      onClick: () => {},
+      onRemove: () => {
+        if(type === 'success')
+          navigate('/chat', { replace: true });
+      },
+    });
+  };
+  
+  async function sendData(){
+  
+    if(password.length > 7){
+      if(password === confirmpassword){
+        try {
+          const {data} = await axios.post("http://localhost:5000/api/user/",{name,email,password});
+          localStorage.setItem("userInfo", JSON.stringify(data));
+          showToast('EXITO', 'REGISTRO EXITOSO', 'success');
+        } catch (error) {
+          showToast('ERORR', error.response.data.message, 'error');
         }
       }
       else{
-        console.log("CONTRASEÑA MUY CORTA");
+        showToast('ERORR', 'CONTRASEÑAS NO COINCIDEN', 'error');
       }
-
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 4000);
-
     }
-    
+    else{
+      showToast('ERORR', 'CONTRASEÑA MUY CORTA', 'error');
+    }
+  }
+  
 </script>
+
+<ToastContainer placement="top-center" let:data={data}>
+  <FlatToast {data} />
+</ToastContainer>
 
 <form 
   on:submit|preventDefault={sendData} 

@@ -2,37 +2,47 @@
 <script>
 // @ts-nocheck
 
-  import { Button, Textarea, Alert, ToolbarButton, Modal, Avatar } from "flowbite-svelte";
-  import { FaEye, FaPaperclip, FaRegPaperPlane, FaRegSmile, FaArrowLeft } from "svelte-icons/fa";
-  import Message from "./Message.svelte";
-  import { ifSelectedChat, notification } from "../store.js";
-  import axios from "axios";
+  // ARREGLAR SCROLL
+
+  import { ifSelectedChat } from "../store.js";
   import { onMount } from "svelte";
+  import { Button, Textarea, Alert, ToolbarButton, Modal, Avatar } from "flowbite-svelte";
+  import { FaEye, FaPaperclip, FaRegPaperPlane, FaRegSmile, FaArrowLeft, FaCircle } from "svelte-icons/fa";
+  import Message from "./Message.svelte";
+  import axios from "axios";
   import io from "socket.io-client";
+  import { useEffect } from "./hooks.js";
 
   let profile = false;
   let hiddenChat = false;
   let userInfo = JSON.parse(localStorage.getItem("userInfo"));
-
+  
+  const ENDPOINT = "http://localhost:5000";
+  let socket, selectedChatCompare;
+  let chatBox;
   let text = "";
   let time = "";
   $: messages = [];
   $: newMessages = [];
+  $: scrollState = true;
 
   $: socketConnected = false;
   $: typing = false;
   $: isTyping = false;
-
-  const ENDPOINT = "http://localhost:5000";
-  let socket, selectedChatCompare;
-
+  
+  
+  // SOCKET.IO CONNECTION 
   onMount(() => {
     socket = io(ENDPOINT);
     socket.emit("setup", userInfo);
     socket.on("connected", () => socketConnected = true);
-    socket.on("typing", () => isTyping = true);
-    socket.on("stop typing", () => isTyping = false);
   });
+
+  useEffect(() => {
+    socket.on("typing", () => {isTyping = true; console.log('TYPING')});
+    socket.on("stop typing", () => {isTyping = false; console.log('NO TYPING')});
+    console.log(`VALOR DE TYPING ES: ${isTyping}`);
+  }, () => []);
 
   onMount(() => {
     socket.on("message recieved", (newMessageRecieved) => {
@@ -50,60 +60,87 @@
     });
   });
 
-  async function sendMessage(){
-    socket.emit("stop typing", $ifSelectedChat._id);
-
-    messages.push(text);
-    let today = new Date();
-    time = today.toLocaleString();
-
-    const { data } = await axios.post("http://localhost:5000/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email});
-    socket.emit("new message", data);
-
-    // console.log(data);
-    notification.set(data);
-
-    text = "";
-    getAllMessage();
-    selectedChatCompare = $ifSelectedChat;
-
-    console.log($notification);
-  }
- 
-  async function getAllMessage(){
-    if(!$ifSelectedChat)
-        return
-
-    const { data } = await axios.get(`http://localhost:5000/api/message/${$ifSelectedChat._id}`);
-    messages = data;
-    socket.emit("join chat", ifSelectedChat._id);
-    //console.log(data);
-  }
-
-  const typingHandler = (e) => {
-    newMessages = e.target.value;
-
-    // console.log(isTyping);
-
-    if (!socketConnected) return;
-
-    if (!typing) {
-        typing = true;
-        socket.emit("typing", $ifSelectedChat._id);
-    }
-    let lastTypingTime = new Date().getTime();
-    let timerLength = 3000;
-
-    setTimeout(() => {
-        let timeNow = new Date().getTime();
-        let timeDiff = timeNow - lastTypingTime;
-        if (timeDiff >= timerLength && typing) {
-            socket.emit("stop typing", $ifSelectedChat._id);
-            typing = false;
-        }
-        }, timerLength);
+    const scrollToBottom = async (node) => {
+        // console.log('HACIENDO SCROLL')
+        if(node)
+            node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
     };
 
+    // useEffect(() => {
+    //     scrollToBottom(chatBox);
+    //     scrollState = false;
+    // }, () => [scrollState]);
+
+    async function sendMessage(){
+
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+
+        socket.emit("stop typing", $ifSelectedChat._id);
+
+        messages.push(text);
+        let today = new Date();
+        time = today.toLocaleString();
+
+        const { data } = await axios.post("http://localhost:5000/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email}, config);
+        socket.emit("new message", data);
+        // notification.set(data);
+
+        text = "";
+        selectedChatCompare = $ifSelectedChat;
+        scrollState = true;
+        
+        //console.log($notification);
+    }
+
+    $: if($ifSelectedChat || messages) {
+        getAllMessage();
+        scrollToBottom(chatBox);
+    }
+
+    async function getAllMessage(){
+        if(!$ifSelectedChat) return
+
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+        
+        const { data } = await axios.get(`http://localhost:5000/api/message/${$ifSelectedChat._id}`, config);
+        messages = data;
+        // socket.emit("join chat", ifSelectedChat._id);
+    }
+
+    // const typingHandler = (e) => {
+    //     newMessages = e.target.value;
+
+    //     if(newMessages){
+    //         isTyping = true;
+    //         //typing = true;
+    //     }
+    //     else {
+    //         isTyping = false;
+    //         //typing = true;
+    //     }
+
+    //     if (!socketConnected) return;
+
+    //     if (!typing) {
+    //         typing = true;
+    //         socket.emit("typing", $ifSelectedChat._id);
+    //     }
+    //     let lastTypingTime = new Date().getTime();
+    //     let timerLength = 3000;
+
+    //     setTimeout(() => {
+    //         let timeNow = new Date().getTime();
+    //         let timeDiff = timeNow - lastTypingTime;
+    //         if (timeDiff >= timerLength && typing) {
+    //             socket.emit("stop typing", $ifSelectedChat._id);
+    //             typing = false;
+    //         }
+    //         }, timerLength);
+    // };
 
 </script>
 
@@ -122,9 +159,8 @@
             <Button color="primary" on:click={() => profile = true} ><div class="w-4"><FaEye /></div></Button>
         </div>
 
-        <div class="flex flex-col flex-grow w-full h-full bg-zinc-100 shadow-xl rounded-lg overflow-hidden">
-            <div class="flex flex-col flex-grow h-0 p-4 overflow-auto">
-
+        <div class="relative flex flex-col flex-grow w-full h-full bg-zinc-100 shadow-xl rounded-lg overflow-hidden">
+            <div class="relative flex flex-col flex-grow h-0 p-4 overflow-auto" bind:this={chatBox}>
                 {#each messages as message}
                     {#if message.sender._id === userInfo._id}
                         <Message 
@@ -145,6 +181,14 @@
                 {/each}
 
             </div>
+            <!-- {#if isTyping}
+                <div class="absolute bottom-20 left-4 animate-bounce flex gap-1 w-6 text-orange-400" >
+                    <FaCircle /><FaCircle /><FaCircle />
+                </div>
+            {:else}
+                <div></div>
+            {/if} -->
+            
             
             <Alert color="light" class="rounded-none rounded-b">
                 <svelte:fragment slot="icon">
@@ -154,20 +198,10 @@
                 <ToolbarButton color="dark" class="w-10 text-gray-500 dark:text-gray-400">
                     <FaRegSmile />
                 </ToolbarButton>
-                {#if isTyping}
-                    <div>
-                        Loading...
-                    </div>
-                {:else}
-                    <div></div>
-                {/if}
                 <Textarea id="chat" class="mx-4" rows="1" placeholder="Your message..." bind:value={text} 
-                    on:keypress={typingHandler}
-                    on:keydown={(e) => {
-                        if(e.key === 'Enter'){
-                            sendMessage();
-                        }
-                    }} 
+                    on:keyup={(e) => {
+                        if(e.key === 'Enter') sendMessage();
+                    }}
                 />
                 <ToolbarButton on:click={sendMessage} class="w-10 rounded-full text-primary-600 dark:text-primary-500">
                     <FaRegPaperPlane />

@@ -3,6 +3,24 @@ const asyncHandler = require("express-async-handler");
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
 
+const getUserChat = asyncHandler(async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const chats = await Chat.find({
+      $and: [
+        { users: { $elemMatch: { $eq: userId } } },
+      ],
+    })
+    .populate("users", "email")
+    .populate("users", "name")
+
+    res.send(chats);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 //@description     Create or fetch One to One Chat
 //@route           POST /api/chat/
 //@access          Protected
@@ -205,4 +223,5 @@ module.exports = {
   renameGroup,
   addToGroup,
   removeFromGroup,
+  getUserChat,
 };

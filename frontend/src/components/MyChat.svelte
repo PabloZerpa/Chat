@@ -8,6 +8,8 @@
   import { onMount } from "svelte";
   import { FaEdit, FaTimes } from "svelte-icons/fa";
 
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
   let createModal = false;
   let updateModal = false;
   let chatName = "";
@@ -21,7 +23,12 @@
 // FUNCTION TO GET ALL CHATS
   async function fetchChats(){
     try {
-        const { data } = await axios.get("http://localhost:5000/api/chat");
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+        const userId = userInfo._id;
+        // const { data } = await axios.get("http://localhost:5000/api/chat");
+        const { data } = await axios.post("http://localhost:5000/api/chat/userchat", {userId}, config); 
         chats = data;
     } catch (error) {
         console.log(error);
@@ -31,9 +38,13 @@
   // FUNCTION TO CREATE CHAT
   async function createChat(chat){
     try {
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+
         const users = chatUser;
         const name = chatName;
-        await axios.post("http://localhost:5000/api/chat/group", {name, users});
+        await axios.post("http://localhost:5000/api/chat/group", {name, users}, config);
         createModal = false;
     } catch (error) {
         console.log(error);
@@ -48,6 +59,8 @@
         chatUser = selectedChat.users;
         chatName = selectedChat.chatName;
         chatId = selectedChat._id;
+
+        console.log(chat);
     } catch (error) {
         console.log(error);
     }
@@ -56,7 +69,11 @@
   // FUNCTION TO UPDATE CHAT
   async function update(){
     try {
-        await axios.put("http://localhost:5000/api/chat/rename", { chatName, chatId });
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+
+        await axios.put("http://localhost:5000/api/chat/rename", { chatName, chatId }, config);
         updateModal = false;
     } catch (error) {
         console.log(error);
@@ -66,8 +83,12 @@
   // FUNCTION TO REMOVE USER
   async function removeUser(user){
     try {
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+
         const userId = user._id;
-        await axios.put("http://localhost:5000/api/chat/groupremove", { chatId, userId });
+        await axios.put("http://localhost:5000/api/chat/groupremove", { chatId, userId }, config);
 
         excludeUser(user);
 
@@ -79,8 +100,12 @@
   // FUNCTION TO ADD USER
   async function addUser(user){
     try {
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+
         const userId = user._id;
-        await axios.put("http://localhost:5000/api/chat/groupadd", { chatId, userId });
+        await axios.put("http://localhost:5000/api/chat/groupadd", { chatId, userId }, config);
 
         selectUser(user);
     } catch (error) {
@@ -91,11 +116,15 @@
   // FUNCTION TO SEARCH BY TERM
   async function handleSearch(){ 
     try {
+        const config = {
+            headers: { Authorization: `Bearer ${userInfo.token}`, },
+        };
+
         if(term === ""){
             users = [];
         }
         else{
-            const { data } = await axios(`http://localhost:5000/api/user?search=${term}`);
+            const { data } = await axios(`http://localhost:5000/api/user?search=${term}`, config);
             users = data;
         }
     } catch (error) {
@@ -155,7 +184,6 @@
                 <div 
                     class="w-3/4 flex flex-row bg-slate-700 hover:bg-slate-500 rounded my-2 items-center justify-center gap-4 p-2 cursor-pointer"
                     on:click={() => {
-                        console.log(chat);
                         ifSelectedChat.set(chat); 
                     }}
                 >

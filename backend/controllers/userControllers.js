@@ -87,4 +87,4 @@ const prueba = async (req, res) => {
   console.log(name, email, password, confirmpassword, img);
 };
 
-module.exports = { allUsers, registerUser, authUser, prueba };
+module.exports = { allUsers, registerUser, authUser };

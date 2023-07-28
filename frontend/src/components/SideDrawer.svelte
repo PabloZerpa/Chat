@@ -8,6 +8,8 @@
   import { FaSearch } from "svelte-icons/fa/";
   import axios from 'axios';
 
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
   let hidden1 = true; 
   let transitionParams = {
       x: -320,
@@ -20,12 +22,15 @@
 
   async function handleSearch(){
     try {
+      const config = {
+        headers: { Authorization: `Bearer ${userInfo.token}`, },
+      };
 
       if(term === "")
         datos = [];
       else{
         setTimeout(async () => {
-          const { data } = await axios(`http://localhost:5000/api/user?search=${term}`);
+          const { data } = await axios(`http://localhost:5000/api/user?search=${term}`, config);
           datos = data;
         }, 500);
       }
