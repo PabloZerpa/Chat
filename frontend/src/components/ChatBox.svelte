@@ -2,8 +2,6 @@
 <script>
 // @ts-nocheck
 
-  // ARREGLAR SCROLL
-
   import { ifSelectedChat } from "../store.js";
   import { onMount } from "svelte";
   import { Button, Textarea, Alert, ToolbarButton, Modal, Avatar } from "flowbite-svelte";
@@ -23,8 +21,9 @@
   let text = "";
   let time = "";
   $: messages = [];
-  $: newMessages = [];
+  // $: newMessages = [];
   $: scrollState = true;
+  $: sendState = false;
 
   $: socketConnected = false;
   $: typing = false;
@@ -61,15 +60,9 @@
   });
 
     const scrollToBottom = async (node) => {
-        // console.log('HACIENDO SCROLL')
         if(node)
             node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
     };
-
-    // useEffect(() => {
-    //     scrollToBottom(chatBox);
-    //     scrollState = false;
-    // }, () => [scrollState]);
 
     async function sendMessage(){
 
@@ -85,23 +78,25 @@
 
         const { data } = await axios.post("http://localhost:5000/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email}, config);
         socket.emit("new message", data);
-        // notification.set(data);
 
         text = "";
         selectedChatCompare = $ifSelectedChat;
-        scrollState = true;
-        
-        //console.log($notification);
+        sendState = true;
+
+        getAllMessage();
     }
 
-    $: if($ifSelectedChat || messages) {
-        getAllMessage();
+    useEffect(() => {
         scrollToBottom(chatBox);
+    }, () => [messages]);
+
+    $: if($ifSelectedChat) {
+        getAllMessage();
     }
 
     async function getAllMessage(){
         if(!$ifSelectedChat) return
-
+        console.log('AQUI');
         const config = {
             headers: { Authorization: `Bearer ${userInfo.token}`, },
         };
