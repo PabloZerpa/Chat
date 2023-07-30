@@ -5,6 +5,9 @@
     export let img = "";
     export let name = "Unknown";
     export let user = true;
+
+    const formatTime = time.substring(0,16);
+    const messageTime = formatTime.replace("T", " ");
 </script>
 
 {#if user}
@@ -18,7 +21,7 @@
             <div class="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
                 <p class="text-sm">{message}</p>
             </div>
-            <span class="text-xs text-gray-500 leading-none">{time}</span>
+            <span class="text-xs text-gray-500 leading-none">{messageTime}</span>
         </div>
     </div>
 {:else}
@@ -27,7 +30,7 @@
             <div class="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
                 <p class="text-sm">{message}</p>
             </div>
-            <span class="text-xs text-gray-500 leading-none">{time}</span>
+            <span class="text-xs text-gray-500 leading-none">{messageTime}</span>
         </div>
 
         <div>

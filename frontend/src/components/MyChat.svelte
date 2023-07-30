@@ -27,7 +27,6 @@
             headers: { Authorization: `Bearer ${userInfo.token}`, },
         };
         const userId = userInfo._id;
-        // const { data } = await axios.get("http://localhost:5000/api/chat");
         const { data } = await axios.post("http://localhost:5000/api/chat/userchat", {userId}, config); 
         chats = data;
     } catch (error) {

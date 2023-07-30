@@ -5,29 +5,20 @@
   import { ifSelectedChat } from "../store.js";
   import { onMount } from "svelte";
   import { Button, Textarea, Alert, ToolbarButton, Modal, Avatar } from "flowbite-svelte";
-  import { FaEye, FaPaperclip, FaRegPaperPlane, FaRegSmile, FaArrowLeft, FaCircle } from "svelte-icons/fa";
+  import { FaEye, FaRegPaperPlane } from "svelte-icons/fa";
+  import { useEffect } from "./hooks.js";
   import Message from "./Message.svelte";
   import axios from "axios";
   import io from "socket.io-client";
-  import { useEffect } from "./hooks.js";
 
+  const ENDPOINT = "http://localhost:5000";
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
   let profile = false;
   let hiddenChat = false;
-  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  
-  const ENDPOINT = "http://localhost:5000";
-  let socket, selectedChatCompare;
-  let chatBox;
+  let socket, chatBox;
   let text = "";
-  let time = "";
   $: messages = [];
-  // $: newMessages = [];
-  $: scrollState = true;
-  $: sendState = false;
-
   $: socketConnected = false;
-  $: typing = false;
-  $: isTyping = false;
   
   
   // SOCKET.IO CONNECTION 
@@ -37,114 +28,45 @@
     socket.on("connected", () => socketConnected = true);
   });
 
+  const scrollToBottom = async (node) => {
+      if(node)
+          node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+  };
+
+  async function sendMessage(){
+
+      const config = {
+          headers: { Authorization: `Bearer ${userInfo.token}`, },
+      };
+
+      messages.push(text);
+      const { data } = await axios.post("http://localhost:5000/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email}, config);
+      socket.emit("new message", data);
+      text = "";
+      getAllMessage();
+  }
+
   useEffect(() => {
-    socket.on("typing", () => {isTyping = true; console.log('TYPING')});
-    socket.on("stop typing", () => {isTyping = false; console.log('NO TYPING')});
-    console.log(`VALOR DE TYPING ES: ${isTyping}`);
-  }, () => []);
+      scrollToBottom(chatBox);
+  }, () => [messages]);
 
-  onMount(() => {
-    socket.on("message recieved", (newMessageRecieved) => {
-      if (
-        !selectedChatCompare || // if chat is not selected or doesn't match current chat
-        selectedChatCompare._id !== newMessageRecieved.chat._id
-      ) {
-        // if (!notification.includes(newMessageRecieved)) {
-        //   setNotification([newMessageRecieved, ...notification]);
-        //   setFetchAgain(!fetchAgain);
-        // }
-      } else {
-        messages = [...messages, newMessageRecieved];
-      }
-    });
-  });
+  $: if($ifSelectedChat) {
+      getAllMessage();
+  }
 
-    const scrollToBottom = async (node) => {
-        if(node)
-            node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
-    };
-
-    async function sendMessage(){
-
-        const config = {
-            headers: { Authorization: `Bearer ${userInfo.token}`, },
-        };
-
-        socket.emit("stop typing", $ifSelectedChat._id);
-
-        messages.push(text);
-        let today = new Date();
-        time = today.toLocaleString();
-
-        const { data } = await axios.post("http://localhost:5000/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email}, config);
-        socket.emit("new message", data);
-
-        text = "";
-        selectedChatCompare = $ifSelectedChat;
-        sendState = true;
-
-        getAllMessage();
-    }
-
-    useEffect(() => {
-        scrollToBottom(chatBox);
-    }, () => [messages]);
-
-    $: if($ifSelectedChat) {
-        getAllMessage();
-    }
-
-    async function getAllMessage(){
-        if(!$ifSelectedChat) return
-        console.log('AQUI');
-        const config = {
-            headers: { Authorization: `Bearer ${userInfo.token}`, },
-        };
-        
-        const { data } = await axios.get(`http://localhost:5000/api/message/${$ifSelectedChat._id}`, config);
-        messages = data;
-        // socket.emit("join chat", ifSelectedChat._id);
-    }
-
-    // const typingHandler = (e) => {
-    //     newMessages = e.target.value;
-
-    //     if(newMessages){
-    //         isTyping = true;
-    //         //typing = true;
-    //     }
-    //     else {
-    //         isTyping = false;
-    //         //typing = true;
-    //     }
-
-    //     if (!socketConnected) return;
-
-    //     if (!typing) {
-    //         typing = true;
-    //         socket.emit("typing", $ifSelectedChat._id);
-    //     }
-    //     let lastTypingTime = new Date().getTime();
-    //     let timerLength = 3000;
-
-    //     setTimeout(() => {
-    //         let timeNow = new Date().getTime();
-    //         let timeDiff = timeNow - lastTypingTime;
-    //         if (timeDiff >= timerLength && typing) {
-    //             socket.emit("stop typing", $ifSelectedChat._id);
-    //             typing = false;
-    //         }
-    //         }, timerLength);
-    // };
+  async function getAllMessage(){
+      if(!$ifSelectedChat) return
+      const config = {
+          headers: { Authorization: `Bearer ${userInfo.token}`, },
+      };
+      
+      const { data } = await axios.get(`http://localhost:5000/api/message/${$ifSelectedChat._id}`, config);
+      messages = data;
+  }
 
 </script>
 
-<div class="w-full h-5/6 sm:flex hidden flex-col gap-4 bg-zinc-800 rounded p-4 border-2 border-blue-500 border-solid">
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="flex sm:hidden w-4 text-white cursor-pointer" on:click={() => {hiddenChat = true}}>
-        <FaArrowLeft />
-    </div>
+<div class="w-full h-5/6 flex flex-col gap-4 bg-zinc-800 rounded p-4 border-2 border-blue-500 border-solid">
 
     {#if !$ifSelectedChat}
         <h1 class="font-bold text-4xl text-white">Click on a chat to start</h1>
@@ -174,25 +96,10 @@
                         />
                     {/if}
                 {/each}
-
             </div>
-            <!-- {#if isTyping}
-                <div class="absolute bottom-20 left-4 animate-bounce flex gap-1 w-6 text-orange-400" >
-                    <FaCircle /><FaCircle /><FaCircle />
-                </div>
-            {:else}
-                <div></div>
-            {/if} -->
-            
             
             <Alert color="light" class="rounded-none rounded-b">
                 <svelte:fragment slot="icon">
-                <ToolbarButton color="dark" class="w-10 text-gray-500 dark:text-gray-400">
-                    <FaPaperclip />
-                </ToolbarButton>
-                <ToolbarButton color="dark" class="w-10 text-gray-500 dark:text-gray-400">
-                    <FaRegSmile />
-                </ToolbarButton>
                 <Textarea id="chat" class="mx-4" rows="1" placeholder="Your message..." bind:value={text} 
                     on:keyup={(e) => {
                         if(e.key === 'Enter') sendMessage();
