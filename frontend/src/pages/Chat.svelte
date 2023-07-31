@@ -23,7 +23,7 @@
 
 </script>
 
-<div class="relative flex flex-col items-center h-screen gap-4 bg-blue-900 border-2 border-green-500 border-solid">
+<div class="relative flex flex-col items-center h-screen gap-4 bg-blue-900">
     <NavBar/>
 
     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -37,7 +37,7 @@
         {/if}
     </div>
 
-    <div class="w-full h-screen grid grid-rows-1 grid-flow-col gap-8 px-4 pt-28 border-2 border-purple-500 border-solid">
+    <div class="w-full h-screen grid grid-rows-1 grid-flow-col gap-8 px-4 pt-28">
         {#if container >= 640}
             <div><MyChat/></div>
             <div class="col-span-6"><ChatBox/></div>

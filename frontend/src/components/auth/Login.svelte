@@ -52,7 +52,7 @@
 
 <form 
   on:submit|preventDefault={sendData} 
-  class="w-1/2 md:w-1/3 p-4 bg-zinc-400 flex flex-col justify-center items-center rounded border-2 border-blue-500 border-solid">
+  class="w-1/2 md:w-1/3 p-4 bg-zinc-400 flex flex-col justify-center items-center rounded">
 
   <div class="mb-6 w-full">
     <Label for="email" class="mb-2">Email address</Label>

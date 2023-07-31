@@ -82,9 +82,4 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-const prueba = async (req, res) => {
-  const { name, email, password, confirmpassword, img } = req.body;
-  console.log(name, email, password, confirmpassword, img);
-};
-
 module.exports = { allUsers, registerUser, authUser };

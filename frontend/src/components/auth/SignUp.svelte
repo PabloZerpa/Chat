@@ -10,7 +10,7 @@
   $: email = null; 
   $: password = null; 
   $: confirmpassword = null; 
-  $: img = null;
+  // $: img = null;
   
   const showToast = (title, description, type) => {
     const toast = toasts.add({
@@ -58,7 +58,7 @@
 
 <form 
   on:submit|preventDefault={sendData} 
-  class="w-1/2 md:w-1/3 p-4 bg-zinc-400 flex flex-col justify-center items-center rounded border-2 border-blue-500 border-solid">
+  class="w-1/2 md:w-1/3 p-4 bg-zinc-400 flex flex-col justify-center items-center rounded">
 
   <div class="mb-6 w-full">
     <Label for="name" class="mb-2">Name</Label>
@@ -80,12 +80,12 @@
     <Input type="password" id="confirmpassword" placeholder="•••••••••" bind:value={confirmpassword} required />
   </div>
 
-  <div class="mb-6 w-full">
+  <!-- <div class="mb-6 w-full">
     <Label class="space-y-2 mb-2">
       <span>Upload file</span>
       <Fileupload bind:img/>
     </Label>
-  </div>
+  </div> -->
 
   <Button type="submit">Sign Up</Button>
 </form>

@@ -26,7 +26,6 @@ const getUserChat = asyncHandler(async (req, res) => {
 //@access          Protected
 const accessChat = asyncHandler(async (req, res) => {
   const { userId, name } = req.body;
-  console.log(userId, name);
 
   if (!userId) {
     console.log("UserId param not sent with request");
@@ -101,8 +100,6 @@ const createGroupChat = asyncHandler(async (req, res) => {
     return res.status(400).send({ message: "Please Fill all the feilds" });
   }
  
-  console.log(req.body.users); 
-  // let users = JSON.parse(req.body.users);
   let users = req.body.users;
 
   if (users.length < 2) {
@@ -137,8 +134,6 @@ const createGroupChat = asyncHandler(async (req, res) => {
 // @access  Protected
 const renameGroup = asyncHandler(async (req, res) => {
   const { chatId, chatName } = req.body;
-
-  console.log(chatId, chatName);
 
   const updatedChat = await Chat.findByIdAndUpdate(
     chatId,

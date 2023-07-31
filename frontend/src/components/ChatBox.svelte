@@ -47,12 +47,17 @@
   }
 
   useEffect(() => {
-      scrollToBottom(chatBox);
+    getAllMessage();
+    scrollToBottom(chatBox);
   }, () => [messages]);
 
   $: if($ifSelectedChat) {
-      getAllMessage();
+        getAllMessage();
   }
+
+//   $: if(messages) {
+//       getAllMessage();
+//   }
 
   async function getAllMessage(){
       if(!$ifSelectedChat) return
@@ -66,7 +71,7 @@
 
 </script>
 
-<div class="w-full h-5/6 flex flex-col gap-4 bg-zinc-800 rounded p-4 border-2 border-blue-500 border-solid">
+<div class="w-full h-5/6 flex flex-col gap-4 bg-zinc-800 rounded p-4">
 
     {#if !$ifSelectedChat}
         <h1 class="font-bold text-4xl text-white">Click on a chat to start</h1>

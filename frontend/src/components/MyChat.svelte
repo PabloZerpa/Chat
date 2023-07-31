@@ -162,7 +162,7 @@
 
 </script>
 
-<div class="w-9/10 h-5/6 flex flex-col justify-between p-4 bg-zinc-800 rounded overflow-auto border-2 border-red-500 border-solid">
+<div class="w-9/10 h-5/6 flex flex-col justify-between p-4 bg-zinc-800 rounded overflow-auto">
 
     <div class="w-full h-12 flex flex-col sm:flex-row justify-between items-center dark:text-white">
         <h1 class="text-lg font-bold">My Chats</h1>
