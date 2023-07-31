@@ -31,7 +31,7 @@
 
     if(password.length > 7){
       try {
-        const {data} = await axios.post("http://localhost:5000/api/user/login/", {email,password});
+        const {data} = await axios.post("https://chat-app-zyr4.onrender.com/api/user/login/", {email,password});
         localStorage.setItem("userInfo", JSON.stringify(data));
         showToast('EXITO', 'INICIO DE SESION COMPLETO', 'success');
       } catch (error) {

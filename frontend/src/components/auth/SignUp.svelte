@@ -34,7 +34,7 @@
     if(password.length > 7){
       if(password === confirmpassword){
         try {
-          const {data} = await axios.post("http://localhost:5000/api/user/",{name,email,password});
+          const {data} = await axios.post("https://chat-app-zyr4.onrender.com/api/user/",{name,email,password});
           localStorage.setItem("userInfo", JSON.stringify(data));
           showToast('EXITO', 'REGISTRO EXITOSO', 'success');
         } catch (error) {

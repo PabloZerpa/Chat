@@ -11,7 +11,7 @@
   import axios from "axios";
   import io from "socket.io-client";
 
-  const ENDPOINT = "http://localhost:5000";
+  const ENDPOINT = "https://chat-app-zyr4.onrender.com";
   let userInfo = JSON.parse(localStorage.getItem("userInfo"));
   let profile = false;
   let hiddenChat = false;
@@ -40,7 +40,7 @@
       };
 
       messages.push(text);
-      const { data } = await axios.post("http://localhost:5000/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email}, config);
+      const { data } = await axios.post("https://chat-app-zyr4.onrender.com/api/message", {content: text, chatId: $ifSelectedChat._id, email: userInfo.email}, config);
       socket.emit("new message", data);
       text = "";
       getAllMessage();
@@ -55,17 +55,13 @@
         getAllMessage();
   }
 
-//   $: if(messages) {
-//       getAllMessage();
-//   }
-
   async function getAllMessage(){
       if(!$ifSelectedChat) return
       const config = {
           headers: { Authorization: `Bearer ${userInfo.token}`, },
       };
       
-      const { data } = await axios.get(`http://localhost:5000/api/message/${$ifSelectedChat._id}`, config);
+      const { data } = await axios.get(`https://chat-app-zyr4.onrender.com/api/message/${$ifSelectedChat._id}`, config);
       messages = data;
   }
 

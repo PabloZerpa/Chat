@@ -9,14 +9,13 @@
   import axios from 'axios';
 
   let userInfo = JSON.parse(localStorage.getItem("userInfo"));
-
   let hidden1 = true; 
   let transitionParams = {
       x: -320,
       duration: 200,
       easing: sineIn
   };
-
+  
   $: term = "";
   $: datos = [];
 
@@ -30,7 +29,7 @@
         datos = [];
       else{
         setTimeout(async () => {
-          const { data } = await axios(`http://localhost:5000/api/user?search=${term}`, config);
+          const { data } = await axios(`https://chat-app-zyr4.onrender.com/api/user?search=${term}`, config);
           datos = data;
         }, 500);
       }
@@ -42,7 +41,7 @@
 
   async function accessChat(userId,name){
     try {
-      const { data } = await axios.post(`http://localhost:5000/api/chat`, {userId, name});
+      const { data } = await axios.post(`https://chat-app-zyr4.onrender.com/api/chat`, {userId, name});
       ifSelectedChat.set(data);
       hidden1 = true;
     } catch (error) {

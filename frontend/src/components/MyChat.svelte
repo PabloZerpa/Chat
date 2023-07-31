@@ -27,7 +27,7 @@
             headers: { Authorization: `Bearer ${userInfo.token}`, },
         };
         const userId = userInfo._id;
-        const { data } = await axios.post("http://localhost:5000/api/chat/userchat", {userId}, config); 
+        const { data } = await axios.post("https://chat-app-zyr4.onrender.com/api/chat/userchat", {userId}, config); 
         chats = data;
     } catch (error) {
         console.log(error);
@@ -43,7 +43,7 @@
 
         const users = chatUser;
         const name = chatName;
-        await axios.post("http://localhost:5000/api/chat/group", {name, users}, config);
+        await axios.post("https://chat-app-zyr4.onrender.com/api/chat/group", {name, users}, config);
         createModal = false;
     } catch (error) {
         console.log(error);
@@ -72,7 +72,7 @@
             headers: { Authorization: `Bearer ${userInfo.token}`, },
         };
 
-        await axios.put("http://localhost:5000/api/chat/rename", { chatName, chatId }, config);
+        await axios.put("https://chat-app-zyr4.onrender.com/api/chat/rename", { chatName, chatId }, config);
         updateModal = false;
     } catch (error) {
         console.log(error);
@@ -87,7 +87,7 @@
         };
 
         const userId = user._id;
-        await axios.put("http://localhost:5000/api/chat/groupremove", { chatId, userId }, config);
+        await axios.put("https://chat-app-zyr4.onrender.com/api/chat/groupremove", { chatId, userId }, config);
 
         excludeUser(user);
 
@@ -104,7 +104,7 @@
         };
 
         const userId = user._id;
-        await axios.put("http://localhost:5000/api/chat/groupadd", { chatId, userId }, config);
+        await axios.put("https://chat-app-zyr4.onrender.com/api/chat/groupadd", { chatId, userId }, config);
 
         selectUser(user);
     } catch (error) {
@@ -123,7 +123,7 @@
             users = [];
         }
         else{
-            const { data } = await axios(`http://localhost:5000/api/user?search=${term}`, config);
+            const { data } = await axios(`https://chat-app-zyr4.onrender.com/api/user?search=${term}`, config);
             users = data;
         }
     } catch (error) {
